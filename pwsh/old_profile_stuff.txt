@@ -1,0 +1,9 @@
+# Add Neovim to PATH if not present.
+if ($env:PATH -notmatch 'Neovim') {
+    $env:PATH += ';C:\tools\neovim\Neovim\bin'
+}
+
+$env:EDITOR        = 'c:/program\ files/vim/vim82/gvim --servername main --remote-tab-silent'
+$env:EDITOR        = 'C:/tools/neovim/Neovim/bin/nvim'
+
+# vim:sw=4 et ft=ps1:
