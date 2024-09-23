@@ -41,6 +41,7 @@
 *.i*86
 *.x86_64
 *.hex
+c/libuv-echo-server/echo-server
 
 # Debug files
 *.dSYM/
