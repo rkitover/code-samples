@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <uv.h>
 
 #define PORT 7000
@@ -14,7 +15,7 @@ void after_write(uv_write_t* req, int status) {
 }
 
 void after_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf) {
-    if (nread < 1) {
+    if (nread < 1 || strncmp(buf->base, "bye", 3) == 0) {
         free(buf->base);
         uv_close((uv_handle_t *)handle, NULL);
         free(handle);
