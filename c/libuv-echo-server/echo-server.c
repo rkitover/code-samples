@@ -27,12 +27,12 @@ void after_read(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
     uv_write(req, handle, buf, 1, after_write);
 }
 
-void on_client(uv_stream_t* server, int status) {
-    uv_tcp_t* stream = malloc(sizeof(uv_tcp_t));
+void on_client(uv_stream_t *server, int status) {
+    uv_tcp_t *stream = malloc(sizeof(uv_tcp_t));
     uv_tcp_init(uv_default_loop(), stream);
     stream->data = server;
-    uv_accept(server, (uv_stream_t*)stream);
-    uv_read_start((uv_stream_t*)stream, alloc_read_buf, after_read);
+    uv_accept(server, (uv_stream_t *)stream);
+    uv_read_start((uv_stream_t *)stream, alloc_read_buf, after_read);
 }
 
 
