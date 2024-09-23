@@ -4,7 +4,7 @@
 
 #define PORT 7000
 
-void alloc_read_buf(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+void alloc_read_buf(uv_handle_t *stream, size_t suggested_size, uv_buf_t *buf) {
     void *memory = malloc(suggested_size);
     *buf = uv_buf_init(memory, suggested_size);
 }
@@ -14,17 +14,17 @@ void after_write(uv_write_t *req, int status) {
     free(req);
 }
 
-void after_read(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
+void after_read(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
     if (nread < 1 || strncmp(buf->base, "bye", 3) == 0) {
         free(buf->base);
-        uv_close((uv_handle_t *)handle, NULL);
-        free(handle);
+        uv_close((uv_handle_t *)stream, NULL);
+        free(stream);
         return;
     }
 
     uv_write_t *req = malloc(sizeof(uv_write_t));
     req->data = buf;
-    uv_write(req, handle, buf, 1, after_write);
+    uv_write(req, stream, buf, 1, after_write);
 }
 
 void on_client(uv_stream_t *server, int status) {
