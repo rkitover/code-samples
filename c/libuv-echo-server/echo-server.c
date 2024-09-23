@@ -4,17 +4,17 @@
 
 #define PORT 7000
 
-void alloc_read_buf(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
+void alloc_read_buf(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
     void *memory = malloc(suggested_size);
     *buf = uv_buf_init(memory, suggested_size);
 }
 
-void after_write(uv_write_t* req, int status) {
+void after_write(uv_write_t *req, int status) {
     free(((uv_buf_t *)req->data)->base);
     free(req);
 }
 
-void after_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf) {
+void after_read(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
     if (nread < 1 || strncmp(buf->base, "bye", 3) == 0) {
         free(buf->base);
         uv_close((uv_handle_t *)handle, NULL);
@@ -36,7 +36,7 @@ void on_client(uv_stream_t* server, int status) {
 }
 
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     unsigned port = argc > 1 ? atoi(argv[1]) : PORT;
 
     uv_tcp_t tcp_server;
