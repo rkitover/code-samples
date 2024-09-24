@@ -20,7 +20,6 @@ void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
     bool is_tty = client != OUT_STREAM;
 
     free(buf->base);
-
     uv_close(client, NULL);
     free(client);
 
