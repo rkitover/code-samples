@@ -5,7 +5,7 @@
 
 #define PORT       7000
 #define QUIT       "bye"
-#define QUIT_SZ    sizeof(QUIT) - 1
+#define QUIT_SZ    (sizeof(QUIT) - 1)
 #define OUT_STREAM client->data
 #define BUF_SZ     4096
 
