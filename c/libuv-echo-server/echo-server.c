@@ -7,30 +7,25 @@
 #define OUT_STREAM client->data
 
 void alloc_buf(uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
-    void *memory = malloc(suggested_size);
-    *buf = uv_buf_init(memory, suggested_size);
+    *buf = uv_buf_init(malloc(suggested_size), suggested_size);
 }
-
-void free_buf(uv_write_t *req, int status) {
-    free(((uv_buf_t *)req->data)->base);
-    free(req);
-}
+void free_buf(uv_write_t *req, int status) { free(((uv_buf_t *)req->data)->base); free(req); }
+void free_client(uv_handle_t *client)      { free(client); }
 
 void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
-    bool is_tty = client != OUT_STREAM;
     free(buf->base);
-    uv_close(client, NULL);
-    free(client);
-    if (is_tty) uv_stop(uv_default_loop());
+    if (client != OUT_STREAM) uv_stop(uv_default_loop());
+    uv_close(client, free_client);
 }
 
 void process(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
-    if (nread < 1 || strncmp(buf->base, "bye", 3) == 0) {
+    if (nread < 1 || (nread >= 3 && strncmp(buf->base, "bye", 3) == 0)) {
         shutdown_client((uv_handle_t *)client, buf);
         return;
     }
     uv_write_t *req = malloc(sizeof(uv_write_t));
-    req->data = buf;
+    req->data = (void *)buf;
+    ((uv_buf_t *)buf)->len = nread;
     uv_write(req, OUT_STREAM, buf, 1, free_buf);
 }
 
