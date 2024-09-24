@@ -1,4 +1,12 @@
-all: echo-server
+SRC=echo-server.c
+EXE=echo-server
 
-echo-server: echo-server.c
-	gcc -o echo-server echo-server.c -luv
+all: ${EXE}
+
+${EXE}: ${SRC}
+	gcc -o $@ $< -luv
+
+.PHONY: clean
+
+clean:
+	rm -f ${EXE}
