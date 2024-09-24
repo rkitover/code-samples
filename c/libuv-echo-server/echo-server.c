@@ -17,15 +17,9 @@ void after_write(uv_write_t *req, int status) {
 }
 
 void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
-    bool is_tty = false;
+    bool is_tty = client != OUT_STREAM;
 
     free(buf->base);
-
-    if (client != OUT_STREAM) {
-        is_tty = true;
-        uv_close(OUT_STREAM, NULL);
-        free(OUT_STREAM);
-    }
 
     uv_close(client, NULL);
     free(client);
@@ -66,12 +60,12 @@ int main(int argc, char **argv) {
     uv_listen((uv_stream_t *)&server, SOMAXCONN, on_client);
 
     uv_tty_t *stdin_tty  = malloc(sizeof(uv_tty_t));
-    uv_tty_t *stdout_tty = malloc(sizeof(uv_tty_t));
+    uv_tty_t  stdout_tty;
 
-    uv_tty_init(uv_default_loop(), stdin_tty,  0, 0);
-    uv_tty_init(uv_default_loop(), stdout_tty, 1, 0);
+    uv_tty_init(uv_default_loop(),  stdin_tty,  0, 0);
+    uv_tty_init(uv_default_loop(), &stdout_tty, 1, 0);
 
-    stdin_tty->data = stdout_tty;
+    stdin_tty->data = &stdout_tty;
 
     uv_read_start((uv_stream_t *)stdin_tty, alloc_read_buf, after_read);
 
