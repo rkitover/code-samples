@@ -16,7 +16,7 @@ void after_write(uv_write_t *req, int status) {
     free(req);
 }
 
-void shutdown_server(uv_handle_t *client, const uv_buf_t *buf) {
+void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
     bool is_tty = false;
 
     free(buf->base);
@@ -36,7 +36,7 @@ void shutdown_server(uv_handle_t *client, const uv_buf_t *buf) {
 
 void after_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
     if (nread < 1 || strncmp(buf->base, "bye", 3) == 0) {
-        shutdown_server((uv_handle_t *)client, buf);
+        shutdown_client((uv_handle_t *)client, buf);
         return;
     }
 
@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
     uv_tty_init(uv_default_loop(), stdout_tty, 1, 0);
 
     stdin_tty->data = stdout_tty;
+
     uv_read_start((uv_stream_t *)stdin_tty, alloc_read_buf, after_read);
 
     uv_run(uv_default_loop(), UV_RUN_DEFAULT);
