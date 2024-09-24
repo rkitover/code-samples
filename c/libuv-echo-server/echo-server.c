@@ -14,15 +14,14 @@ void free_client(uv_handle_t *client)      { free(client); }
 
 void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
     free(buf->base);
-    if (client != OUT_STREAM) uv_stop(uv_default_loop());
     uv_close(client, free_client);
+    if (client != OUT_STREAM) uv_stop(uv_default_loop());
 }
 
 void process(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
-    if (nread < 1 || (nread >= 3 && strncmp(buf->base, "bye", 3) == 0)) {
-        shutdown_client((uv_handle_t *)client, buf);
-        return;
-    }
+    if (nread < 0 || (nread >= 3 && strncmp(buf->base, "bye", 3) == 0))
+        { shutdown_client((uv_handle_t *)client, buf); return; }
+    if (nread == 0) { free(buf->base); return; }
     uv_write_t *req = malloc(sizeof(uv_write_t));
     req->data = (void *)buf;
     ((uv_buf_t *)buf)->len = nread;
@@ -51,5 +50,6 @@ int main(int argc, char **argv) {
     stdin_tty->data = &stdout_tty;
     uv_read_start((uv_stream_t *)stdin_tty, alloc_buf, process);
 
-    return uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+    return 0;
 }
