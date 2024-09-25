@@ -3,11 +3,11 @@
 #include <string.h>
 #include <uv.h>
 
-#define PORT       7000
-#define QUIT       "bye"
-#define QUIT_SZ    (sizeof(QUIT) - 1)
-#define OUT_STREAM client->data
-#define BUF_SZ     4096
+#define PORT        7000
+#define QUIT        "bye"
+#define QUIT_SZ     (sizeof(QUIT) - 1)
+#define OUT(client) client->data
+#define BUF_SZ      4096
 
 uv_tcp_t server;
 uv_tty_t *stdin_tty = NULL, stdout_tty;
@@ -33,13 +33,13 @@ void process(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
     uv_write_t *req = malloc(sizeof(uv_write_t));
     req->data = (void *)buf;
     ((uv_buf_t *)buf)->len = nread;
-    uv_write(req, OUT_STREAM, buf, 1, free_buf);
+    uv_write(req, OUT(client), buf, 1, free_buf);
 }
 
 void accept_client(uv_stream_t *server, int status) {
     uv_tcp_t *client = malloc(sizeof(uv_tcp_t));
     uv_tcp_init(uv_default_loop(), client);
-    OUT_STREAM = client;
+    OUT(client) = client;
     uv_accept(server, (uv_stream_t *)client);
     uv_read_start((uv_stream_t *)client, alloc_buf, process);
 }
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     stdin_tty = malloc(sizeof(uv_tty_t));
     uv_tty_init(uv_default_loop(),  stdin_tty,  0, 0);
     uv_tty_init(uv_default_loop(), &stdout_tty, 1, 0);
-    stdin_tty->data = &stdout_tty;
+    OUT(stdin_tty) = &stdout_tty;
     uv_read_start((uv_stream_t *)stdin_tty, alloc_buf, process);
 
     return uv_run(uv_default_loop(), UV_RUN_DEFAULT);
