@@ -10,7 +10,7 @@
 #define BUF_SZ      4096
 
 uv_tcp_t server;
-uv_tty_t *stdin_tty = NULL, stdout_tty;
+uv_tty_t *console = NULL, console_out;
 
 void alloc_buf(uv_handle_t *client, size_t suggested_size, uv_buf_t *buf)
     { *buf = uv_buf_init(malloc(BUF_SZ), BUF_SZ); }
@@ -20,9 +20,9 @@ void free_client(uv_handle_t *client)      { free(client); }
 void shutdown_client(uv_handle_t *client, const uv_buf_t *buf) {
     free(buf->base);
     uv_close(client, free_client);
-    if (client == (uv_handle_t *)stdin_tty) {
+    if (client == (uv_handle_t *)console) {
         uv_close((uv_handle_t *)&server,     NULL);
-        uv_close((uv_handle_t *)&stdout_tty, NULL);
+        uv_close((uv_handle_t *)&console_out, NULL);
     }
 }
 
@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
     uv_tcp_bind(&server, (const struct sockaddr *)&addr, 0);
     uv_listen((uv_stream_t *)&server, SOMAXCONN, accept_client);
 
-    stdin_tty = malloc(sizeof(uv_tty_t));
-    uv_tty_init(uv_default_loop(),  stdin_tty,  0, 0);
-    uv_tty_init(uv_default_loop(), &stdout_tty, 1, 0);
-    OUT(stdin_tty) = &stdout_tty;
-    uv_read_start((uv_stream_t *)stdin_tty, alloc_buf, process);
+    console = malloc(sizeof(uv_tty_t));
+    uv_tty_init(uv_default_loop(),  console,     0, 0);
+    uv_tty_init(uv_default_loop(), &console_out, 1, 0);
+    OUT(console) = &console_out;
+    uv_read_start((uv_stream_t *)console, alloc_buf, process);
 
     return uv_run(uv_default_loop(), UV_RUN_DEFAULT);
 }

@@ -1,7 +1,7 @@
 NAME=echo-server
 SRC=${NAME}.c
 
-ifeq ($(OS),Windows)
+ifneq ($(findstring Windows,$(OS)),)
     EXE_EXT=.exe
 endif
 
@@ -16,8 +16,10 @@ ${EXE}: ${SRC}
 
 else
 
+CC?=gcc
+
 ${EXE}: ${SRC}
-	gcc -o $@ $< -luv
+	${CC} -o $@ $< -luv
 
 endif
 
